@@ -1,6 +1,7 @@
 checkpoints/
 file_dir.py
 *.ipynb
+*Imagenet*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
