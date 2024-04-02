@@ -238,7 +238,10 @@ class SETC(FewShotModel):
 
         # task feature部分
         # attention之前的任务特征
-        output, hn, cn = self.lstm(origin_proto.unsqueeze(1))
+        if self.args.pool_before_lstm:
+            1
+        else:
+            output, hn, cn = self.lstm(origin_proto.unsqueeze(1))
         if self.args.task_feat=='output_max':
             feat_task_1, _ =  torch.max(output, dim=0)
         elif self.args.task_feat=='hn_mean':
@@ -246,6 +249,10 @@ class SETC(FewShotModel):
         feat_task_1 = nn.functional.normalize(feat_task_1, dim=1) # (1, 256)
 
         # attention之后的任务特征
+        if self.args.pool_before_lstm:
+            1
+        else:
+            output, hn, cn = self.lstm(origin_proto.unsqueeze(1))
         output, hn, cn = self.lstm(proto.unsqueeze(1))
         if self.args.task_feat=='output_max':
             feat_task_2, _ =  torch.max(output, dim=0)

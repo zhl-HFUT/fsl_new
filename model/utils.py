@@ -70,6 +70,8 @@ def postprocess_args(args):
     elif args.dataset == 'CUB':
         args.mem_len = 100
         args.top5s = file_dir.cub_top5
+    else:
+        raise KeyError
     if args.backbone_class == 'ConvNet':
         args.dim_model = 64
         if args.dataset == 'MiniImageNet':
@@ -135,6 +137,7 @@ def get_command_line_parser():
 
     # infoNCE
     parser.add_argument('--use_infoNCE', action='store_true', default=False)
+    parser.add_argument('--pool_before_lstm', action='store_true', default=False)
     parser.add_argument('--tasker', type=str, default='blstm', choices=['blstm', 'attention']) # 目前只有blstm
     parser.add_argument('--task_feat', type=str, default='output_max', choices=['hn_mean', 'output_max', 'cls_token'])
     parser.add_argument('--T', type=float, default=0.07) # temperature for infoNCE loss
@@ -165,7 +168,7 @@ def get_command_line_parser():
     parser.add_argument('--query', type=int, default=15)
     
     # 数据集
-    parser.add_argument('--dataset', type=str, default='CUB',
+    parser.add_argument('--dataset', type=str, default='MiniImageNet',
                         choices=['MiniImageNet', 'TieredImageNet_og', 'CUB'])
     # 这里的resize分两步，先128再84，不知道为什么——128是放进cache的，要不然就直接84
     parser.add_argument('--im_size', type=int, default=128)

@@ -130,13 +130,13 @@ class FewShotModel(nn.Module):
 
         if self.training:
             logits, logits_simclr, metrics, sims, pure_index, logits_blstm = self._forward(instance_embs, 
-                support_idx, query_idx, key_cls=key_cls, ids=ids, simclr_embs=simclr_embs)
+                support_idx, query_idx, ids=ids, simclr_embs=simclr_embs, key_cls=key_cls)
             return logits, logits_simclr, metrics, sims, pure_index, logits_blstm
         else:
             if test:
-                origin_proto, proto, query = self._forward(instance_embs, support_idx, query_idx, ids, test=test)
+                origin_proto, proto, query = self._forward(instance_embs, support_idx, query_idx, ids=ids, key_cls=key_cls, test=test)
                 return origin_proto, proto, query
-            logits, logits_blstm = self._forward(instance_embs, support_idx, query_idx, ids, test=test, key_cls=key_cls)
+            logits, logits_blstm = self._forward(instance_embs, support_idx, query_idx, ids=ids, key_cls=key_cls)
             return logits, logits_blstm
 
     def _forward(self, x, support_idx, query_idx):
