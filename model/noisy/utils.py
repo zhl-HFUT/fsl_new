@@ -146,7 +146,7 @@ def add_noise(
 
     # Replace clean data with noisy data at selected positions
 
-    print(noise_type)
+    # print(noise_type)
 
     if noise_type == "sym_swap":
         # Swap data positions of selected samples, ensuring plurality of clean class
@@ -197,7 +197,7 @@ def add_noise(
 
     return noised_data, noised_labels, noise_positions
 
-def prepare_data(args, data, percent=0.0):
+def prepare_data(args, data, noisy_type="pair_swap", percent=0.0):
     labels = torch.arange(args.way, dtype=torch.int16).repeat(args.query+args.shot*2)
     labels = labels.type(torch.LongTensor).cuda()
 
@@ -215,7 +215,7 @@ def prepare_data(args, data, percent=0.0):
             mask_indices,
             5,
             percent,
-            "pair_swap",
+            noisy_type,
             None,
         )
     
@@ -230,3 +230,4 @@ def prepare_data(args, data, percent=0.0):
     data = data.squeeze(0)[indices_final].squeeze(0)
 
     return data
+

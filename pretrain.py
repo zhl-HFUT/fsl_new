@@ -84,10 +84,10 @@ if __name__ == '__main__':
     train_loader = DataLoader(dataset=trainset, batch_size=args.batch_size, shuffle=True, num_workers=8, pin_memory=True)
     args.num_class = trainset.num_class
     print(args.num_class)
-    valset = Dataset('val', args)
-    val_sampler = CategoriesSampler(valset.label, 200, valset.num_class, 1 + args.query) # test on 16-way 1-shot
-    val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, num_workers=8, pin_memory=True)
-    args.way = valset.num_class
+    testset = Dataset('test', args)
+    test_sampler = CategoriesSampler(testset.label, 100, 5, 16) # test on 16-way 1-shot
+    test_loader = DataLoader(dataset=testset, batch_sampler=test_sampler, num_workers=8, pin_memory=True)
+    args.way = 5
     args.shot = 1
     
     # construct model
@@ -194,33 +194,39 @@ if __name__ == '__main__':
         tl = tl.item()
         ta = ta.item()
 
+        print('train acc: ', ta)
+
         # do not do validation in first 500 epoches
+        # a = 1
         if epoch > 100 or (epoch-1) % 5 == 0:
+        # if a == 1:
             model.eval()
             vl_dist = Averager()
             va_dist = Averager()
             vl_sim = Averager()
             va_sim = Averager()            
             print('[Dist] best epoch {}, current best val acc={:.4f}'.format(trlog['max_acc_dist_epoch'], trlog['max_acc_dist']))
-            print('[Sim] best epoch {}, current best val acc={:.4f}'.format(trlog['max_acc_sim_epoch'], trlog['max_acc_sim']))
+            # print('[Sim] best epoch {}, current best val acc={:.4f}'.format(trlog['max_acc_sim_epoch'], trlog['max_acc_sim']))
             # test performance with Few-Shot
-            label = torch.arange(valset.num_class).repeat(args.query)
+            label = torch.arange(5).repeat(args.query)
             if torch.cuda.is_available():
                 label = label.type(torch.cuda.LongTensor)
             else:
                 label = label.type(torch.LongTensor)        
             with torch.no_grad():
-                for i, batch in tqdm(enumerate(val_loader, 1)):
+                for i, batch in tqdm(enumerate(test_loader, 1)):
                     if torch.cuda.is_available():
                         data, dummy_label = [_.cuda() for _ in batch]
                     else:
                         data, _ = batch
-                    data_shot, data_query = data[:valset.num_class], data[valset.num_class:] # 16-way test
+                    
+                    # print(data.shape)
+                    data_shot, data_query = data[:5], data[5:] # 16-way test
 
                     # print('putting al zero in data query 5')
                     # data_query[5,:,:,:] = torch.zeros(3, 84, 84)
 
-                    logits_dist, logits_sim = model.forward_proto(data_shot, data_query, valset.num_class)
+                    logits_dist, logits_sim = model.forward_proto(data_shot, data_query, testset.num_class)
                     # asd
                     # label = dummy_label[valset.num_class:]
 
@@ -255,7 +261,7 @@ if __name__ == '__main__':
             writer.add_scalar('data/val_acc_dist', float(va_dist), epoch)     
             writer.add_scalar('data/val_loss_sim', float(vl_sim), epoch)
             writer.add_scalar('data/val_acc_sim', float(va_sim), epoch)               
-            print('epoch {}, val, loss_dist={:.4f} acc_dist={:.4f} loss_sim={:.4f} acc_sim={:.4f}'.format(epoch, vl_dist, va_dist, vl_sim, va_sim))
+            print('epoch {}, val, loss_dist={:.4f} acc_dist={:.4f} '.format(epoch, vl_dist, va_dist))
     
             if va_dist > trlog['max_acc_dist']:
                 trlog['max_acc_dist'] = va_dist

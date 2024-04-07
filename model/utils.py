@@ -80,6 +80,9 @@ def postprocess_args(args):
         elif args.dataset == 'CUB':
             args.init_weights = file_dir.cub_pre_conv4
             args.memory = file_dir.cub_mem_conv4
+        elif args.dataset == 'TieredImageNet_og':
+            args.init_weights = file_dir.tiered_pre_conv4
+            args.memory = file_dir.tiered_mem_conv4
         
     elif args.backbone_class == 'Res12':
         args.dim_model = 640

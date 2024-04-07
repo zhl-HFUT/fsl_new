@@ -107,12 +107,12 @@ class Classifier(nn.Module):
         proto = proto.reshape(-1, 1600)
         query = query.reshape(-1, 1600)
         # print(proto.shape, query.shape)
-        proto = proto.reshape(self.args.shot, way, -1).mean(dim=0)
+        proto = proto.reshape(self.args.shot, 5, -1).mean(dim=0)
         # print('proto after reshape and mean', proto.shape)
         # print(proto.mean(1))
         
         # print('embed query mean 5 ', query.mean(1))
-        # print(query.shape)
+        # print(query.shape, proto.shape)
         logits_dist = euclidean_metric(query, proto)
         logits_sim = torch.mm(query, F.normalize(proto, p=2, dim=-1).t())
         return logits_dist, logits_sim
